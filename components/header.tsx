@@ -24,7 +24,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <div className="relative h-14 w-56 sm:h-16 sm:w-64">
+            <div className="relative h-[168px] w-[672px] sm:h-48 sm:w-[768px]">
               <Image
                 src="/logo-full.png"
                 alt="WeiyaTrading - Your China Sourcing Partner"

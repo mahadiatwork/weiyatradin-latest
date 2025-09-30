@@ -10,7 +10,7 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <div className="relative h-12 w-56">
+              <div className="relative h-36 w-[672px]">
                 <Image
                   src="/logo-full.png"
                   alt="WeiyaTrading - Your China Sourcing Partner"
