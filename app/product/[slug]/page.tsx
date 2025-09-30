@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { notFound } from "next/navigation"
 import { Star, Package, Clock, MapPin, Shield, FileText, ShoppingCart, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,9 +15,8 @@ import { QuantityStepper } from "@/components/quantity-stepper"
 import { BulkBadge } from "@/components/bulk-badge"
 import { MOQHint } from "@/components/moq-hint"
 import { ProductCard } from "@/components/product-card"
-import { mockProducts } from "@/lib/mock"
+import type { Product } from "@/lib/types"
 import { formatCurrency, calculatePrice } from "@/lib/price"
-import { usePriceMode } from "@/hooks/use-price-mode"
 import { useRFQ } from "@/hooks/use-rfq"
 import { useCart } from "@/lib/cart"
 import { useToast } from "@/hooks/use-toast"
@@ -29,26 +28,95 @@ interface ProductPageProps {
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
-  const product = mockProducts.find((p) => p.slug === params.slug)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
   const { openRFQ } = useRFQ()
   const { addItem } = useCart()
 
   const [quantity, setQuantity] = useState(1)
-  const { mode, setMode } = usePriceMode(product!, quantity)
+  const [priceMode, setPriceMode] = useState<"single" | "bulk">("single")
 
-  if (!product) {
-    notFound()
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true)
+        
+        const productResponse = await fetch(`/api/products?slug=${params.slug}`)
+        
+        if (!productResponse.ok) {
+          if (productResponse.status === 404) {
+            console.error('Product not found:', params.slug)
+          } else if (productResponse.status === 401 || productResponse.status === 403) {
+            console.error('Authentication error - check WooCommerce credentials')
+          } else {
+            console.error('Failed to fetch product')
+          }
+          setIsLoading(false)
+          return
+        }
+        
+        const product = await productResponse.json()
+        setProduct(product)
+        
+        if (product.categoryId) {
+          const recommendedResponse = await fetch(`/api/products?per_page=20&category=${product.categoryId}`)
+          if (recommendedResponse.ok) {
+            const products = await recommendedResponse.json()
+            const recommended = products
+              .filter((p: Product) => p.id !== product.id)
+              .slice(0, 4)
+            setRecommendedProducts(recommended)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProduct()
+  }, [params.slug])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading product...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
-  const pricing = useMemo(() => calculatePrice(product, quantity, mode), [product, quantity, mode])
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-semibold mb-2">Product not found</h3>
+            <p className="text-muted-foreground mb-4">The product you're looking for doesn't exist or has been removed.</p>
+            <Button onClick={() => window.location.href = '/catalog'}>Browse Products</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
-  const recommendedProducts = mockProducts
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, 4)
+  const pricing = useMemo(() => {
+    if (!product) return { unitPrice: 0, totalPrice: 0, savings: null, tier: null }
+    return calculatePrice(product, quantity, priceMode)
+  }, [product, quantity, priceMode])
 
   const handleAddToCart = () => {
-    addItem(product, quantity, mode)
+    addItem(product, quantity, priceMode)
     toast({
       title: "Added to cart",
       description: `${quantity} × ${product.title} added to your cart.`,
@@ -104,7 +172,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
             {/* Pricing Section */}
             <div className="space-y-4">
-              <PriceToggle value={mode} onValueChange={setMode} />
+              <PriceToggle value={priceMode} onValueChange={setPriceMode} />
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                 <div className="flex items-baseline justify-between">
@@ -112,7 +180,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <span className="text-2xl font-bold">{formatCurrency(pricing.unitPrice)}</span>
                 </div>
 
-                {mode === "bulk" && pricing.savings && (
+                {priceMode === "bulk" && pricing.savings && (
                   <div className="flex items-baseline justify-between text-green-600">
                     <span className="text-sm">You save:</span>
                     <span className="font-semibold">{formatCurrency(pricing.savings)}</span>
@@ -150,7 +218,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={10000} />
               </div>
 
-              <MOQHint currentQuantity={quantity} moq={product.moq} priceMode={mode} />
+              <MOQHint currentQuantity={quantity} moq={product.moq} priceMode={priceMode} />
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={handleAddToCart} className="flex-1">

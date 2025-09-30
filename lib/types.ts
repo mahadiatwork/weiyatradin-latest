@@ -29,6 +29,7 @@ export interface Product {
   bulkTiers: PriceTier[]
   moq: number
   category: string
+  categoryId?: number
   tags: string[]
   rating?: number
   shipsFrom: "China"

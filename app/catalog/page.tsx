@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Filter, Grid, List, SortAsc } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { FiltersPanel, type FilterState } from "@/components/filters-panel"
 import { SkeletonCard } from "@/components/skeleton-card"
-import { mockProducts } from "@/lib/mock"
+import type { Product } from "@/lib/types"
 
 type SortOption = "relevance" | "price-low" | "price-high" | "moq-low" | "moq-high" | "rating"
 
@@ -19,6 +19,7 @@ export default function CatalogPage() {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
 
+  const [products, setProducts] = useState<Product[]>([])
   const [filters, setFilters] = useState<FilterState>({
     categories: categoryParam ? [categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)] : [],
     priceRange: [0, 200],
@@ -26,10 +27,28 @@ export default function CatalogPage() {
   })
   const [sortBy, setSortBy] = useState<SortOption>("relevance")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch('/api/products?per_page=50')
+        if (!response.ok) throw new Error('Failed to fetch products')
+        const data = await response.json()
+        setProducts(data)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const filteredAndSortedProducts = useMemo(() => {
-    const filtered = mockProducts.filter((product) => {
+    const filtered = products.filter((product) => {
       // Category filter
       if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
         return false
@@ -71,7 +90,7 @@ export default function CatalogPage() {
     }
 
     return filtered
-  }, [filters, sortBy])
+  }, [products, filters, sortBy])
 
   const handleFiltersChange = (newFilters: FilterState) => {
     setFilters(newFilters)

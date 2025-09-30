@@ -35,10 +35,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Data Layer
 
-**Mock Data Architecture**:
-- All product data currently sourced from `/lib/mock.ts`
-- Type-safe interfaces defined in `/lib/types.ts`
-- Ready for backend integration (no actual API calls implemented yet)
+**WooCommerce Integration** (September 2025):
+- Connected to WordPress backend at cms.weiyatrading.com
+- WooCommerce REST API v3 for product data and order management
+- Server-side API routes keep credentials secure
+- Custom adapter layer transforms WooCommerce data to Product interface
+- Supports bulk pricing tiers, MOQ, and custom product fields via meta_data
 
 **Key Data Models**:
 - `Product`: Core product entity with images, pricing tiers, MOQ, shipping details
@@ -128,9 +130,15 @@ Preferred communication style: Simple, everyday language.
 - Vercel (hosting platform)
 - Automatic deployments from v0.app integration
 
-**Future Integration Points**:
-- Backend API for product data (currently using mock data)
-- Payment gateway integration (Stripe/PayPal mentioned in types)
-- Database for order management (no current implementation)
+**API Integration Architecture**:
+- `/app/api/products` - Fetches and transforms WooCommerce products
+- `/app/api/categories` - Fetches product categories from WooCommerce
+- `/app/api/checkout` - Creates orders in WooCommerce (findOrCreateCustomer + createOrder)
+- `/lib/wc.ts` - WooCommerce API client with HTTP Basic Auth
+- `/lib/wc-adapter.ts` - Transforms WooCommerce data to app's Product type
+
+**Future Enhancements**:
+- Payment gateway integration (Stripe/PayPal) for set_paid orders
 - Email service for order confirmations and RFQ notifications
-- Authentication system for user accounts (not currently implemented)
+- Authentication system for B2B user accounts with custom pricing
+- Advanced order tracking and shipment management
