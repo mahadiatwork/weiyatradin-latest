@@ -75,6 +75,14 @@ export async function wcFetch(
   init?: RequestInit,
   search?: Record<string, string | number | boolean>
 ): Promise<any> {
+  if (!WC_BASE_URL) {
+    throw new Error('WC_BASE_URL environment variable is not configured')
+  }
+  
+  if (!WC_CONSUMER_KEY || !WC_CONSUMER_SECRET) {
+    throw new Error('WooCommerce API credentials are not configured')
+  }
+  
   const url = new URL(`${WC_BASE_URL}/wp-json/wc/v3${path}`)
   
   if (search) {

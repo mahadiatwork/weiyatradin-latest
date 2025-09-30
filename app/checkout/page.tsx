@@ -80,8 +80,12 @@ export default function CheckoutPage() {
     router.push("/checkout/success")
   }
 
-  if (items.length === 0) {
+  if (typeof window !== 'undefined' && items.length === 0) {
     router.push("/cart")
+    return null
+  }
+  
+  if (items.length === 0) {
     return null
   }
 

@@ -3,6 +3,7 @@ import { listProducts, getProduct, getProductBySlug } from '@/lib/wc'
 import { transformWCProduct, transformWCProducts } from '@/lib/wc-adapter'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
