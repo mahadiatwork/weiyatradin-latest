@@ -130,12 +130,18 @@ Preferred communication style: Simple, everyday language.
 - Vercel (hosting platform)
 - Automatic deployments from v0.app integration
 
-**API Integration Architecture**:
-- `/app/api/products` - Fetches and transforms WooCommerce products
+**API Integration Architecture** (Production-Ready, September 2025):
+- `/app/api/products` - Fetches and transforms WooCommerce products (supports ?id, ?slug, or list queries)
 - `/app/api/categories` - Fetches product categories from WooCommerce
 - `/app/api/checkout` - Creates orders in WooCommerce (findOrCreateCustomer + createOrder)
-- `/lib/wc.ts` - WooCommerce API client with HTTP Basic Auth
-- `/lib/wc-adapter.ts` - Transforms WooCommerce data to app's Product type
+- `/lib/wc.ts` - WooCommerce API client with HTTP Basic Auth, includes:
+  - `getProduct(id)` - Fetch single product by ID
+  - `getProductBySlug(slug)` - Fetch single product by slug using WooCommerce filter
+  - `listProducts(params)` - Fetch products with pagination, category, and search filters
+  - `listCategories()` - Fetch all product categories
+  - `createOrder()` - Create orders in WooCommerce
+- `/lib/wc-adapter.ts` - Transforms WooCommerce data to app's Product type, includes categoryId for accurate filtering
+- All API routes use Node.js runtime for Buffer support in authentication
 
 **Future Enhancements**:
 - Payment gateway integration (Stripe/PayPal) for set_paid orders
