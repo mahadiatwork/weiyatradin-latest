@@ -16,6 +16,12 @@ Preferred communication style: Simple, everyday language.
 - Address: No.11, Building 11, Wenzhou Trade City, Fengshou Road, Wangchu Sub-district, Jiaozuo City, Henan Province, China
 - Favicon: Globe icon with China highlighted (located at `/public/favicon.ico`)
 
+**Navigation & Header** (Updated September 2025):
+- Logo sized at h-10 w-40 (sm: h-12 w-48) for optimal visibility without cramping
+- Navigation layout uses flex-1 with justify-start and ml-8 for better spacing
+- Navigation visible on md+ breakpoints (tablets and desktop)
+- Mobile menu not yet implemented (navigation hidden on screens <768px)
+
 # System Architecture
 
 ## Frontend Architecture
@@ -96,6 +102,7 @@ Preferred communication style: Simple, everyday language.
 - Category images loaded from WooCommerce API (category.image.src)
 - Fallback Package icon for categories without images
 - External images marked as unoptimized for WooCommerce domain compatibility
+- Events Gallery component displays company event photos with modern hover effects and modal popup (September 2025)
 
 **Team Information**:
 - TeamMemberCard component with professional profiles
