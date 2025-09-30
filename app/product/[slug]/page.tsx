@@ -80,6 +80,25 @@ export default function ProductPage({ params }: ProductPageProps) {
     fetchProduct()
   }, [params.slug])
 
+  const pricing = useMemo(() => {
+    if (!product) return { unitPrice: 0, totalPrice: 0, savings: null, tier: null }
+    return calculatePrice(product, quantity, priceMode)
+  }, [product, quantity, priceMode])
+
+  const handleAddToCart = () => {
+    if (!product) return
+    addItem(product, quantity, priceMode)
+    toast({
+      title: "Added to cart",
+      description: `${quantity} × ${product.title} added to your cart.`,
+    })
+  }
+
+  const handleRequestQuote = () => {
+    if (!product) return
+    openRFQ(product.id)
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -108,23 +127,6 @@ export default function ProductPage({ params }: ProductPageProps) {
         <Footer />
       </div>
     )
-  }
-
-  const pricing = useMemo(() => {
-    if (!product) return { unitPrice: 0, totalPrice: 0, savings: null, tier: null }
-    return calculatePrice(product, quantity, priceMode)
-  }, [product, quantity, priceMode])
-
-  const handleAddToCart = () => {
-    addItem(product, quantity, priceMode)
-    toast({
-      title: "Added to cart",
-      description: `${quantity} × ${product.title} added to your cart.`,
-    })
-  }
-
-  const handleRequestQuote = () => {
-    openRFQ(product.id)
   }
 
   return (
