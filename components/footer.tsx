@@ -10,7 +10,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded bg-primary" />
-              <span className="text-xl font-bold">BulkSource</span>
+              <span className="text-xl font-bold">WeiyaTrading</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Your trusted partner for bulk sourcing and wholesale orders. Quality products, competitive prices, global
@@ -117,7 +117,7 @@ export function Footer() {
         <div className="mt-8 pt-8 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © 2025 BulkSource. All rights reserved. | ICP Registration: 粤ICP备12345678号
+              © 2025 WeiyaTrading. All rights reserved. | ICP Registration: 粤ICP备12345678号
             </p>
             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
               <span>Incoterms: EXW, FOB, CIF, DDP Supported</span>

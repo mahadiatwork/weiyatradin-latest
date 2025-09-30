@@ -8,7 +8,7 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "BulkSource - Wholesale & Bulk Orders",
+  title: "WeiyaTrading - Wholesale & Bulk Orders",
   description:
     "Your trusted partner for bulk sourcing and wholesale orders. Quality products, competitive prices, global shipping.",
   generator: "v0.app",

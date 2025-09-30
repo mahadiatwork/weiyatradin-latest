@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
+import { TeamSection } from "@/components/team-section"
 import { useRFQ } from "@/hooks/use-rfq"
 import { mockProducts, categories } from "@/lib/mock"
 
@@ -75,7 +76,7 @@ export default function HomePage() {
                 <div className="aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-br from-muted to-muted/50">
                   <Image
                     src="/modern-warehouse-with-products-and-logistics.jpg"
-                    alt="BulkSource warehouse and logistics"
+                    alt="WeiyaTrading warehouse and logistics"
                     fill
                     className="object-cover"
                     priority
@@ -230,7 +231,7 @@ export default function HomePage() {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Why Choose BulkSource?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Why Choose WeiyaTrading?</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Trusted by businesses worldwide for reliable sourcing and logistics
               </p>
@@ -277,13 +278,16 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Team Section */}
+        <TeamSection />
+
         {/* CTA Section */}
         <section className="py-20 bg-primary text-primary-foreground">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto space-y-8">
               <h2 className="text-3xl lg:text-4xl font-bold">Ready to Source at Scale?</h2>
               <p className="text-lg opacity-90">
-                Join thousands of businesses who trust BulkSource for their wholesale and bulk order needs. Get started
+                Join thousands of businesses who trust WeiyaTrading for their wholesale and bulk order needs. Get started
                 with a custom quote today.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
