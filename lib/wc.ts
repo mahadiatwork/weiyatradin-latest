@@ -76,14 +76,23 @@ export async function wcFetch(
   search?: Record<string, string | number | boolean>
 ): Promise<any> {
   if (!WC_BASE_URL) {
-    throw new Error('WC_BASE_URL environment variable is not configured')
+    throw new Error('WC_BASE_URL environment variable is not configured. Please set it in your deployment environment.')
   }
   
   if (!WC_CONSUMER_KEY || !WC_CONSUMER_SECRET) {
-    throw new Error('WooCommerce API credentials are not configured')
+    throw new Error('WooCommerce API credentials (WC_CONSUMER_KEY and WC_CONSUMER_SECRET) are not configured. Please set them in your deployment environment.')
+  }
+
+  if (!WC_BASE_URL.startsWith('http://') && !WC_BASE_URL.startsWith('https://')) {
+    throw new Error(`WC_BASE_URL must start with http:// or https://. Current value: ${WC_BASE_URL}`)
   }
   
-  const url = new URL(`${WC_BASE_URL}/wp-json/wc/v3${path}`)
+  let url: URL
+  try {
+    url = new URL(`${WC_BASE_URL}/wp-json/wc/v3${path}`)
+  } catch (error) {
+    throw new Error(`Invalid WC_BASE_URL format: ${WC_BASE_URL}. Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
   
   if (search) {
     Object.entries(search).forEach(([key, value]) => {
