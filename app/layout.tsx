@@ -13,7 +13,11 @@ export const metadata: Metadata = {
     "Your trusted partner for bulk sourcing and wholesale orders. Quality products, competitive prices, global shipping.",
   generator: "v0.app",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/favicon.png",
   },
 }
 

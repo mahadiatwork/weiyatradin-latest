@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Mail, Phone, MapPin } from "lucide-react"
 
 export function Footer() {
@@ -9,7 +10,14 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded bg-primary" />
+              <div className="relative h-8 w-8">
+                <Image
+                  src="/favicon.png"
+                  alt="WeiyaTrading"
+                  fill
+                  className="object-contain"
+                />
+              </div>
               <span className="text-xl font-bold">WeiyaTrading</span>
             </div>
             <p className="text-sm text-muted-foreground">
