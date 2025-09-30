@@ -21,9 +21,9 @@ const teamMembers: TeamMember[] = [
     name: "Md Mahadi Hasan",
     title: "Chief Technology Officer",
     email: "mahadi.hanshan@gmail.com",
-    phone: "+8801867884361",
+    phone: "+8617868798393",
     image: "/md-mahadi-hasan-cto.jpg",
-    wechatQR: undefined,
+    wechatQR: "/mahadi-wechat-qr.png",
   },
 ]
 
