@@ -1,0 +1,121 @@
+You are my code generator. Produce everything in one response.
+Goal: Integrate an existing Next.js 14+ (App Router) app with WooCommerce REST API on https://cms.weiyatrading.com.
+
+Important security & cost constraints
+
+Server-only WooCommerce calls (no keys in the browser). Use Next.js Route Handlers under /app/api/*.
+
+Use native fetch only. No extra deps (no axios, no woocommerce sdk).
+
+Minimize files and comments; give runnable code + brief notes.
+
+Assume Node 18+.
+
+All env values must be read from process.env (no literals).
+
+Environment variables (create .env and document)
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+WC_BASE_URL=https://cms.weiyatrading.com
+WC_CONSUMER_KEY=ck_xxx
+WC_CONSUMER_SECRET=cs_xxx
+
+Deliverables (create/replace these files)
+src/lib/wc.ts
+src/app/api/products/route.ts
+src/app/api/categories/route.ts
+src/app/api/checkout/route.ts
+src/app/shop/page.tsx
+src/app/shop/[id]/page.tsx
+
+1) src/lib/wc.ts
+
+Export a wcFetch(path: string, init?: RequestInit, search?: Record<string,string|number|boolean>) helper that:
+
+Builds URL as ${WC_BASE_URL}/wp-json/wc/v3${path}.
+
+Adds HTTP Basic Auth header using WC_CONSUMER_KEY:WC_CONSUMER_SECRET (base64).
+
+Sends/accepts JSON, throws on non-2xx with body text.
+
+Export typed helpers:
+
+listProducts({ page=1, per_page=12, category?, search? })
+
+getProduct(id: number | string)
+
+listCategories({ page=1, per_page=50, parent? })
+
+findOrCreateCustomer({ email, first_name?, last_name?, billing?, shipping? })
+
+Try GET /customers?email=...; if empty, POST /customers.
+
+createOrder({ customer_id?, email?, line_items: [{product_id, variation_id?, quantity}], billing?, shipping?, payment_method='bacs', payment_method_title='Bank Transfer', set_paid=false })
+
+Note: For GET lists, pass ?_fields=id,name,price,images,permalink,slug,short_description to reduce payload and save credits.
+
+2) src/app/api/products/route.ts
+
+GET → returns paginated products from WooCommerce:
+
+Query params: page, per_page, category, search.
+
+Calls listProducts and returns JSON.
+
+3) src/app/api/categories/route.ts
+
+GET → returns product categories (top level by default; accepts parent).
+
+4) src/app/api/checkout/route.ts
+
+POST → expects JSON:
+
+{
+  "customer": {
+    "email": "buyer@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "billing": { "first_name": "...", "last_name": "...", "address_1": "...", "city": "...", "country": "US", "email": "buyer@example.com", "phone": "..." },
+    "shipping": { "first_name": "...", "last_name": "...", "address_1": "...", "city": "...", "country": "US" }
+  },
+  "items": [{ "product_id": 123, "quantity": 2 }],
+  "payment": { "method": "cod", "title": "Cash on Delivery", "set_paid": false }
+}
+
+
+Steps:
+
+findOrCreateCustomer by email → get customer_id.
+
+createOrder with customer_id, line_items, billing, shipping, and payment_method fields.
+
+Return the WooCommerce order JSON (id, status, number, total).
+
+Validate payload; return 400 for bad input.
+
+5) src/app/shop/page.tsx (simple demo UI)
+
+Server component that fetch('/api/products?per_page=12', { cache: 'no-store' }).
+
+Renders a grid of products: image, name, price, link to /shop/[id].
+
+6) src/app/shop/[id]/page.tsx
+
+Server component: fetch('/api/products?id=...') or call /api/products with id.
+
+Renders details and a tiny “Add to cart” demo: POST to /api/checkout with 1 qty and a hardcoded test customer, then show order number. (Small demo, not a full cart.)
+
+Code
+
+Provide full implementations for all files above. Use strict TypeScript where helpful but keep types minimal. Include small product/category interfaces in wc.ts.
+
+Notes / Setup
+
+WooCommerce: make sure Permalinks are enabled and REST API keys have read/write.
+
+No client exposure of keys; only call /api/* from the browser.
+
+On Vercel, set the same env vars.
+
+For production payments, integrate a proper gateway (Stripe, etc.) and set set_paid accordingly.
+
+Return the complete code and a 10-line “How to test” section (curl examples for /api/products, /api/categories, /api/checkout). No extra prose.
