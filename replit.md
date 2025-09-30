@@ -8,6 +8,14 @@ The platform is designed for business buyers looking to source products at scale
 
 Preferred communication style: Simple, everyday language.
 
+# Branding & Contact Information
+
+**Company Contact Details**:
+- Phone: +86 15138088555
+- Email: lizhenhua991121@gmail.com
+- Address: No.11, Building 11, Wenzhou Trade City, Fengshou Road, Wangchu Sub-district, Jiaozuo City, Henan Province, China
+- Favicon: Globe icon with China highlighted (located at `/public/favicon.ico`)
+
 # System Architecture
 
 ## Frontend Architecture
@@ -85,6 +93,9 @@ Preferred communication style: Simple, everyday language.
 - Video support (poster images and controls)
 - Responsive image loading with Next.js Image optimization
 - Priority loading for above-fold images
+- Category images loaded from WooCommerce API (category.image.src)
+- Fallback Package icon for categories without images
+- External images marked as unoptimized for WooCommerce domain compatibility
 
 **Team Information**:
 - TeamMemberCard component with professional profiles
