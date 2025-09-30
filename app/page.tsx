@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Package, Shield, Truck, Users, Star, CheckCircle } from "lucide-react"
@@ -11,11 +12,47 @@ import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { TeamSection } from "@/components/team-section"
 import { useRFQ } from "@/hooks/use-rfq"
-import { mockProducts, categories } from "@/lib/mock"
+import type { Product } from "@/lib/types"
+
+interface Category {
+  id: number
+  name: string
+  slug: string
+  count: number
+}
 
 export default function HomePage() {
   const { openRFQ } = useRFQ()
-  const featuredProducts = mockProducts.slice(0, 4)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesRes, productsRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/products?per_page=4')
+        ])
+
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json()
+          setCategories(categoriesData.slice(0, 6))
+        }
+
+        if (productsRes.ok) {
+          const productsData = await productsRes.json()
+          setFeaturedProducts(productsData)
+        }
+      } catch (error) {
+        console.error('Error fetching home page data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,48 +185,60 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {categories.map((category) => {
-                const categoryProducts = mockProducts.filter((p) => p.category === category)
-                const productCount = categoryProducts.length
-
-                const categoryImageMap: Record<string, string> = {
-                  "Hats & Caps": "/hats-caps-category-showcase.jpg",
-                  "Power Banks": "/power-banks-category-showcase.jpg",
-                  Headphones: "/headphones-category-showcase.jpg",
-                  "Medical Items": "/medical-items-category-showcase.jpg",
-                  Bags: "/bags-category-showcase.jpg",
-                }
-
-                return (
-                  <Card key={category} className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <Image
-                        src={
-                          categoryImageMap[category] ||
-                          `/placeholder.svg?height=300&width=400&query=${category.toLowerCase()} products showcase`
-                        }
-                        alt={`${category} products`}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-4 left-4 text-white">
-                        <h3 className="text-xl font-semibold mb-1">{category}</h3>
-                        <p className="text-sm opacity-90">{productCount} products</p>
-                      </div>
-                    </div>
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <div className="relative aspect-[4/3] bg-muted animate-pulse" />
                     <CardContent className="p-6">
-                      <Button asChild variant="outline" className="w-full bg-transparent">
-                        <Link href={`/catalog?category=${category.toLowerCase()}`}>
-                          Explore {category}
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Link>
-                      </Button>
+                      <div className="h-10 bg-muted animate-pulse rounded" />
                     </CardContent>
                   </Card>
-                )
-              })}
+                ))
+              ) : categories.length > 0 ? (
+                categories.map((category) => {
+                  const categoryImageMap: Record<string, string> = {
+                    "Hats & Caps": "/hats-caps-category-showcase.jpg",
+                    "Power Banks": "/power-banks-category-showcase.jpg",
+                    Headphones: "/headphones-category-showcase.jpg",
+                    "Medical Items": "/medical-items-category-showcase.jpg",
+                    Bags: "/bags-category-showcase.jpg",
+                  }
+
+                  return (
+                    <Card key={category.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300">
+                      <div className="relative aspect-[4/3] overflow-hidden">
+                        <Image
+                          src={
+                            categoryImageMap[category.name] ||
+                            `/placeholder.svg?height=300&width=400&query=${category.name.toLowerCase()} products showcase`
+                          }
+                          alt={`${category.name} products`}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute bottom-4 left-4 text-white">
+                          <h3 className="text-xl font-semibold mb-1">{category.name}</h3>
+                          <p className="text-sm opacity-90">{category.count} products</p>
+                        </div>
+                      </div>
+                      <CardContent className="p-6">
+                        <Button asChild variant="outline" className="w-full bg-transparent">
+                          <Link href={`/catalog?category=${category.id}`}>
+                            Explore {category.name}
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )
+                })
+              ) : (
+                <div className="col-span-3 text-center py-12">
+                  <p className="text-muted-foreground">No categories available yet</p>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -211,9 +260,27 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <div className="relative aspect-square bg-muted animate-pulse" />
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <div className="h-4 bg-muted animate-pulse rounded" />
+                        <div className="h-4 bg-muted animate-pulse rounded w-2/3" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : featuredProducts.length > 0 ? (
+                featuredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <div className="col-span-4 text-center py-12">
+                  <p className="text-muted-foreground">No products available yet</p>
+                </div>
+              )}
             </div>
 
             <div className="text-center mt-8 sm:hidden">
