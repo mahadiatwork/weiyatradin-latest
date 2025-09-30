@@ -267,7 +267,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
             <TabsContent value="description" className="mt-6">
               <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-line">{product.description}</div>
+                <div dangerouslySetInnerHTML={{ __html: product.description }} />
               </div>
             </TabsContent>
 
