@@ -19,15 +19,15 @@ export function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>sales@bulksource.com</span>
+                <span>lizhenhua991121@gmail.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+86 15138088555</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Shenzhen, China</span>
+                <span>No.11, Building 11, Wenzhou Trade City, Fengshou Road, Wangchu Sub-district, Jiaozuo City, Henan Province, China</span>
               </div>
             </div>
           </div>
