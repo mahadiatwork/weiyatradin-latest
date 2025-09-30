@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   description:
     "Your trusted partner for bulk sourcing and wholesale orders. Quality products, competitive prices, global shipping.",
   generator: "v0.app",
+  icons: {
+    icon: "/favicon.ico",
+  },
 }
 
 export default function RootLayout({
