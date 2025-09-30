@@ -21,10 +21,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <div className="relative h-[168px] w-[672px] sm:h-48 sm:w-[768px]">
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <div className="relative h-12 w-44 sm:h-14 sm:w-52">
               <Image
                 src="/logo-full.png"
                 alt="WeiyaTrading - Your China Sourcing Partner"
@@ -36,7 +36,7 @@ export function Header() {
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-4 xl:space-x-6 flex-1 justify-start ml-8">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-1">

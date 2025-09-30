@@ -11,6 +11,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
 import { TeamSection } from "@/components/team-section"
+import { EventsGallery } from "@/components/events-gallery"
 import { useRFQ } from "@/hooks/use-rfq"
 import type { Product } from "@/lib/types"
 
@@ -346,6 +347,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Events Gallery */}
+        <EventsGallery />
 
         {/* Team Section */}
         <TeamSection />
