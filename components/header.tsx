@@ -23,17 +23,16 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="relative h-10 w-10">
+          <Link href="/" className="flex items-center">
+            <div className="relative h-12 w-48">
               <Image
-                src="/favicon.png"
-                alt="WeiyaTrading"
+                src="/logo-full.png"
+                alt="WeiyaTrading - Your China Sourcing Partner"
                 fill
-                className="object-contain"
+                className="object-contain object-left"
                 priority
               />
             </div>
-            <span className="text-xl font-bold">weiyatrading</span>
           </Link>
 
           {/* Navigation */}
