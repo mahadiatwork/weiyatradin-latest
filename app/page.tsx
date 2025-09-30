@@ -19,6 +19,12 @@ interface Category {
   name: string
   slug: string
   count: number
+  image: {
+    id: number
+    src: string
+    name: string
+    alt: string
+  } | null
 }
 
 export default function HomePage() {
@@ -196,27 +202,23 @@ export default function HomePage() {
                 ))
               ) : categories.length > 0 ? (
                 categories.map((category) => {
-                  const categoryImageMap: Record<string, string> = {
-                    "Hats & Caps": "/hats-caps-category-showcase.jpg",
-                    "Power Banks": "/power-banks-category-showcase.jpg",
-                    Headphones: "/headphones-category-showcase.jpg",
-                    "Medical Items": "/medical-items-category-showcase.jpg",
-                    Bags: "/bags-category-showcase.jpg",
-                  }
-
                   return (
                     <Card key={category.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-                      <div className="relative aspect-[4/3] overflow-hidden">
-                        <Image
-                          src={
-                            categoryImageMap[category.name] ||
-                            `/placeholder.svg?height=300&width=400&query=${category.name.toLowerCase()} products showcase`
-                          }
-                          alt={`${category.name} products`}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
+                      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                        {category.image?.src ? (
+                          <Image
+                            src={category.image.src}
+                            alt={category.image.alt || `${category.name} products`}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <Package className="h-16 w-16" />
+                          </div>
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         <div className="absolute bottom-4 left-4 text-white">
                           <h3 className="text-xl font-semibold mb-1">{category.name}</h3>
