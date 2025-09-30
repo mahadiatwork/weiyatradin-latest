@@ -45,11 +45,17 @@ export default function HomePage() {
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json()
           setCategories(categoriesData.slice(0, 6))
+        } else {
+          const errorData = await categoriesRes.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('Categories API failed:', categoriesRes.status, errorData)
         }
 
         if (productsRes.ok) {
           const productsData = await productsRes.json()
           setFeaturedProducts(productsData)
+        } else {
+          const errorData = await productsRes.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('Products API failed:', productsRes.status, errorData)
         }
       } catch (error) {
         console.error('Error fetching home page data:', error)

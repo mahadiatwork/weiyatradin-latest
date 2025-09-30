@@ -34,7 +34,11 @@ export default function CatalogPage() {
       try {
         setIsLoading(true)
         const response = await fetch('/api/products?per_page=50')
-        if (!response.ok) throw new Error('Failed to fetch products')
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('Products API failed:', response.status, errorData)
+          throw new Error(`Failed to fetch products: ${response.status}`)
+        }
         const data = await response.json()
         setProducts(data)
       } catch (error) {
