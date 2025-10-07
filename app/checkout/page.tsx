@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, CreditCard, Truck, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,11 +19,18 @@ import { Footer } from "@/components/footer"
 import { useCart } from "@/lib/cart"
 import { formatCurrency, calculatePrice } from "@/lib/price"
 import { incoterms } from "@/lib/mock"
+import { useToast } from "@/hooks/use-toast"
+import { init, createElement } from '@airwallex/components-sdk'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, clearCart } = useCart()
+  const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [paymentReady, setPaymentReady] = useState(false)
+  const [intentId, setIntentId] = useState<string>('')
+  const [clientSecret, setClientSecret] = useState<string>('')
+  const cardElementRef = useRef<any>(null)
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
@@ -68,16 +75,167 @@ export default function CheckoutPage() {
   const estimatedTax = cartTotals.subtotal * 0.08 // 8% tax placeholder
   const total = cartTotals.subtotal + estimatedShipping + estimatedTax
 
+  // Initialize Airwallex SDK and create payment intent
+  useEffect(() => {
+    const initializePayment = async () => {
+      if (items.length === 0) return
+
+      try {
+        // Initialize Airwallex SDK
+        await init({
+          env: process.env.NEXT_PUBLIC_AIRWALLEX_ENV === 'prod' ? 'prod' : 'demo',
+          enabledElements: ['payments'],
+        })
+
+        // Create payment intent
+        const response = await fetch('/api/airwallex/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: total,
+            currency: 'USD',
+            orderId: `order-${Date.now()}`,
+            customerEmail: shippingInfo.email,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create payment intent')
+        }
+
+        const data = await response.json()
+        setIntentId(data.intentId)
+        setClientSecret(data.clientSecret)
+
+        // Create and mount card element
+        const card = await createElement('card', {
+          style: {
+            base: {
+              color: '#1a1a1a',
+              fontSize: '16px',
+              fontFamily: 'inherit',
+            },
+          },
+        })
+
+        card.mount('airwallex-card')
+        cardElementRef.current = card
+
+        card.on('ready', () => {
+          setPaymentReady(true)
+        })
+      } catch (error) {
+        console.error('Payment initialization error:', error)
+        toast({
+          title: "Payment Setup Failed",
+          description: "Unable to initialize payment. Please refresh the page.",
+          variant: "destructive",
+        })
+      }
+    }
+
+    initializePayment()
+  }, [items.length, total, toast])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsProcessing(true)
 
-    // Simulate order processing
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      if (paymentMethod === 'credit-card') {
+        // Airwallex card payment
+        if (!cardElementRef.current || !intentId || !clientSecret) {
+          throw new Error('Payment not ready')
+        }
 
-    // Clear cart and redirect to success page
-    clearCart()
-    router.push("/checkout/success")
+        const result = await cardElementRef.current.confirm({
+          element: cardElementRef.current,
+          intent_id: intentId,
+          client_secret: clientSecret,
+        })
+
+        if (result.status !== 'SUCCEEDED') {
+          throw new Error('Payment failed')
+        }
+
+        // Create order in WooCommerce
+        await createWooCommerceOrder(result.id)
+      } else {
+        // For other payment methods, just create the order
+        await createWooCommerceOrder()
+      }
+
+      // Clear cart and redirect to success page
+      clearCart()
+      router.push("/checkout/success")
+    } catch (error: any) {
+      console.error('Order processing error:', error)
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Unable to process payment. Please try again.",
+        variant: "destructive",
+      })
+      setIsProcessing(false)
+    }
+  }
+
+  const createWooCommerceOrder = async (paymentId?: string) => {
+    const orderData = {
+      payment_method: paymentMethod,
+      payment_method_title: paymentMethod === 'credit-card' ? 'Credit Card (Airwallex)' : 
+                            paymentMethod === 'bank-transfer' ? 'Bank Transfer' : 'Letter of Credit',
+      set_paid: paymentMethod === 'credit-card' && paymentId ? true : false,
+      billing: {
+        first_name: sameAsShipping ? shippingInfo.firstName : billingInfo.firstName,
+        last_name: sameAsShipping ? shippingInfo.lastName : billingInfo.lastName,
+        company: sameAsShipping ? shippingInfo.company : billingInfo.company,
+        address_1: sameAsShipping ? shippingInfo.address : billingInfo.address,
+        city: sameAsShipping ? shippingInfo.city : billingInfo.city,
+        state: sameAsShipping ? shippingInfo.state : billingInfo.state,
+        postcode: sameAsShipping ? shippingInfo.zipCode : billingInfo.zipCode,
+        country: sameAsShipping ? shippingInfo.country : billingInfo.country,
+        email: shippingInfo.email,
+        phone: shippingInfo.phone,
+      },
+      shipping: {
+        first_name: shippingInfo.firstName,
+        last_name: shippingInfo.lastName,
+        company: shippingInfo.company,
+        address_1: shippingInfo.address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        postcode: shippingInfo.zipCode,
+        country: shippingInfo.country,
+      },
+      line_items: items.map(item => {
+        const pricing = calculatePrice(item.product, item.quantity, item.priceMode)
+        return {
+          product_id: item.product.id,
+          quantity: item.quantity,
+          subtotal: pricing.totalPrice.toString(),
+          total: pricing.totalPrice.toString(),
+        }
+      }),
+      customer_note: specialInstructions,
+      meta_data: [
+        { key: 'incoterm', value: incoterm },
+        { key: 'price_mode', value: items[0]?.priceMode || 'single' },
+        ...(paymentId ? [{ key: 'airwallex_payment_id', value: paymentId }] : []),
+      ],
+    }
+
+    const response = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Order creation failed' }))
+      throw new Error(errorData.error || 'Failed to create order')
+    }
+
+    return response.json()
   }
 
   if (typeof window !== 'undefined' && items.length === 0) {
@@ -320,7 +478,7 @@ export default function CheckoutPage() {
                   <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="credit-card" id="credit-card" />
-                      <Label htmlFor="credit-card">Credit Card</Label>
+                      <Label htmlFor="credit-card">Credit Card / Debit Card</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="bank-transfer" id="bank-transfer" />
@@ -332,12 +490,32 @@ export default function CheckoutPage() {
                     </div>
                   </RadioGroup>
 
-                  <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      Payment details will be collected after order confirmation. For bulk orders, we offer flexible
-                      payment terms including NET 30 for qualified businesses.
-                    </p>
-                  </div>
+                  {paymentMethod === 'credit-card' && (
+                    <div className="mt-4 space-y-3">
+                      <div className="p-4 border rounded-lg">
+                        <Label className="text-sm font-medium mb-2 block">Card Information</Label>
+                        <div id="airwallex-card" className="min-h-[40px]"></div>
+                        {!paymentReady && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                            Loading secure payment form...
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Accepts Visa, Mastercard, American Express, UnionPay, Alipay, and WeChat Pay
+                      </p>
+                    </div>
+                  )}
+
+                  {paymentMethod !== 'credit-card' && (
+                    <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                      <p className="text-sm text-muted-foreground">
+                        Payment details will be collected after order confirmation. For bulk orders, we offer flexible
+                        payment terms including NET 30 for qualified businesses.
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
