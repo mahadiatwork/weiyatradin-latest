@@ -2,13 +2,15 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Star, Package, FileText } from "lucide-react"
+import { Star, Package, FileText, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import type { Product } from "@/lib/types"
 import { formatCurrency } from "@/lib/price"
 import { useRFQ } from "@/hooks/use-rfq"
+import { useCart } from "@/lib/cart"
+import { useToast } from "@/hooks/use-toast"
 
 interface ProductCardProps {
   product: Product
@@ -16,7 +18,18 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { openRFQ } = useRFQ()
+  const { addItem } = useCart()
+  const { toast } = useToast()
   const lowestBulkTier = product.bulkTiers[product.bulkTiers.length - 1]
+
+  const handleAddToCart = () => {
+    addItem(product, product.moq, 'bulk')
+    
+    toast({
+      title: "Added to cart",
+      description: `${product.title} (${product.moq} units) added to cart`,
+    })
+  }
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
@@ -72,18 +85,23 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 space-y-2">
+      <CardFooter className="p-4 pt-0 flex-col space-y-2">
+        <Button onClick={handleAddToCart} size="sm" className="w-full">
+          <ShoppingCart className="h-4 w-4 mr-2" />
+          Add to Cart
+        </Button>
         <div className="flex w-full space-x-2">
-          <Button asChild size="sm" className="flex-1">
+          <Button asChild size="sm" variant="outline" className="flex-1">
             <Link href={`/product/${product.slug}`}>View Details</Link>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => openRFQ(product.id)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            className="flex-1"
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4 mr-2" />
+            Quote
           </Button>
         </div>
       </CardFooter>

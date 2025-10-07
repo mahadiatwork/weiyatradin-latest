@@ -87,12 +87,14 @@ Preferred communication style: Simple, everyday language.
 - Pre-populated product information when opened from product pages
 - Support for custom requirements, certifications, and Incoterms
 
-**Product Browsing**:
+**Product Browsing & Purchasing** (Updated October 2025):
 - Category-based filtering
 - Price range and MOQ range sliders
 - Sort options (relevance, price, MOQ, rating)
 - Grid and list view modes
 - Search parameter persistence via URL
+- **Direct "Add to Cart" buttons on product cards** - Users can purchase products instantly from catalog/homepage
+- Quick access to both purchasing (Add to Cart) and quote requests (Request Quote) from product cards
 
 **Media Handling**:
 - Multi-image product galleries with navigation
