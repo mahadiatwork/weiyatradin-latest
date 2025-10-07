@@ -148,10 +148,12 @@ Preferred communication style: Simple, everyday language.
 - Vercel (hosting platform)
 - Automatic deployments from v0.app integration
 
-**API Integration Architecture** (Production-Ready, September 2025):
+**API Integration Architecture** (Production-Ready, October 2025):
 - `/app/api/products` - Fetches and transforms WooCommerce products (supports ?id, ?slug, or list queries)
 - `/app/api/categories` - Fetches product categories from WooCommerce
 - `/app/api/checkout` - Creates orders in WooCommerce (findOrCreateCustomer + createOrder)
+- `/app/api/airwallex/auth` - Authenticates with Airwallex payment gateway
+- `/app/api/airwallex/create-payment-intent` - Creates Airwallex PaymentIntent for checkout
 - `/lib/wc.ts` - WooCommerce API client with HTTP Basic Auth, includes:
   - `getProduct(id)` - Fetch single product by ID
   - `getProductBySlug(slug)` - Fetch single product by slug using WooCommerce filter
@@ -161,8 +163,18 @@ Preferred communication style: Simple, everyday language.
 - `/lib/wc-adapter.ts` - Transforms WooCommerce data to app's Product type, includes categoryId for accurate filtering
 - All API routes use Node.js runtime for Buffer support in authentication
 
+**Payment Integration** (October 2025):
+- **Airwallex Payment Gateway**: Integrated for secure payment processing
+  - Supports Visa, Mastercard, American Express, UnionPay, Alipay, WeChat Pay
+  - Ideal for China-based B2B operations with competitive cross-border FX rates
+  - SDK: `@airwallex/components-sdk` for embedded card payment elements
+  - Checkout flow: PaymentIntent creation → Card element mounting → Payment confirmation → WooCommerce order creation
+  - Orders marked as "paid" automatically when credit card payment succeeds
+  - Alternative payment methods (bank transfer, letter of credit) create pending orders
+  - Environment variable: AIRWALLEX_ENV ('demo' for testing, 'prod' for live)
+
 **Future Enhancements**:
-- Payment gateway integration (Stripe/PayPal) for set_paid orders
 - Email service for order confirmations and RFQ notifications
 - Authentication system for B2B user accounts with custom pricing
 - Advanced order tracking and shipment management
+- Webhook integration for real-time payment status updates

@@ -81,10 +81,20 @@ export default function CheckoutPage() {
       if (items.length === 0) return
 
       try {
-        // Initialize Airwallex SDK
+        // Initialize Airwallex SDK with authentication
         await init({
           env: process.env.NEXT_PUBLIC_AIRWALLEX_ENV === 'prod' ? 'prod' : 'demo',
           enabledElements: ['payments'],
+          getToken: async () => {
+            const authResponse = await fetch('/api/airwallex/auth', {
+              method: 'POST',
+            })
+            if (!authResponse.ok) {
+              throw new Error('Failed to authenticate with Airwallex')
+            }
+            const authData = await authResponse.json()
+            return authData.token
+          },
         })
 
         // Create payment intent
