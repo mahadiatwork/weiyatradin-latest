@@ -14,18 +14,29 @@ async function getAuthToken() {
   const clientId = process.env.AIRWALLEX_CLIENT_ID
   const apiKey = process.env.AIRWALLEX_API_KEY
 
+  if (!clientId || !apiKey) {
+    throw new Error('Airwallex credentials not configured. Please set AIRWALLEX_CLIENT_ID and AIRWALLEX_API_KEY')
+  }
+
   const response = await fetch(`${AIRWALLEX_API_URL}/api/v1/authentication/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-client-id': clientId!,
-      'x-api-key': apiKey!,
+      'x-client-id': clientId,
+      'x-api-key': apiKey,
     },
     body: JSON.stringify({}),
   })
 
   if (!response.ok) {
-    throw new Error('Failed to authenticate with Airwallex')
+    const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+    console.error('Airwallex authentication failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorData,
+      url: AIRWALLEX_API_URL
+    })
+    throw new Error(`Failed to authenticate with Airwallex: ${response.status} ${errorData.message || response.statusText}`)
   }
 
   const data = await response.json()
