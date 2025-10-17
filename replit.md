@@ -6,6 +6,13 @@ The platform is designed for business buyers looking to source products at scale
 
 # Recent Changes
 
+**Category Enrichment & Accurate Counts** (October 2025):
+- Categories API now supports `?enrich=true` parameter for accurate product counts
+- Enrichment fetches actual product counts from WooCommerce products API for each category
+- Filters out: categories with 0 products, "Uncategorized", and categories without images (unless 5+ products)
+- Homepage displays all relevant categories with correct counts (e.g., "Kitchen accessories: 23 products")
+- WooCommerce's native count field was inaccurate and has been replaced with real-time counts
+
 **Pagination & API Response Format** (October 2025):
 - Products API now returns paginated response: `{ products: [], total, totalPages, currentPage, perPage }`
 - Catalog page displays 20 products per page with Previous/Next navigation
