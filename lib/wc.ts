@@ -221,10 +221,12 @@ export async function listCategories(params?: {
   page?: number
   per_page?: number
   parent?: number
+  hide_empty?: boolean
 }): Promise<WCCategory[]> {
   const searchParams: Record<string, string | number> = {
     page: params?.page || 1,
     per_page: params?.per_page || 50,
+    hide_empty: params?.hide_empty !== undefined ? (params.hide_empty ? 1 : 0) : 0,
     _fields: 'id,name,slug,parent,description,image,count',
   }
 
