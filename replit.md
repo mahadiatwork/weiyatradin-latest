@@ -4,6 +4,15 @@ WeiyaTrading is a B2B e-commerce platform built with Next.js 14 that connects bu
 
 The platform is designed for business buyers looking to source products at scale, offering transparent pricing tiers based on order quantities, minimum order quantity (MOQ) enforcement, and comprehensive product information including shipping details and lead times.
 
+# Recent Changes
+
+**Pagination & API Response Format** (October 2025):
+- Products API now returns paginated response: `{ products: [], total, totalPages, currentPage, perPage }`
+- Catalog page displays 20 products per page with Previous/Next navigation
+- Product count shows accurate totals from WooCommerce (e.g., "74 products found", "Showing 1-20 of 74")
+- Homepage and product detail page updated to handle new API response format with backward compatibility
+- Category filtering uses slug-to-ID mapping for proper WooCommerce integration
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
