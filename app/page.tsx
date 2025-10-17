@@ -52,7 +52,7 @@ export default function HomePage() {
 
         if (productsRes.ok) {
           const productsData = await productsRes.json()
-          setFeaturedProducts(productsData)
+          setFeaturedProducts(productsData.products || productsData)
         } else {
           const errorData = await productsRes.json().catch(() => ({ error: 'Unknown error' }))
           console.error('Products API failed:', productsRes.status, errorData)
@@ -234,7 +234,7 @@ export default function HomePage() {
                       </div>
                       <CardContent className="p-6">
                         <Button asChild variant="outline" className="w-full bg-transparent">
-                          <Link href={`/catalog?category=${category.id}`}>
+                          <Link href={`/catalog?category=${category.slug}`}>
                             Explore {category.name}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Link>

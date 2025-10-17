@@ -63,7 +63,8 @@ export default function ProductPage({ params }: ProductPageProps) {
         if (product.categoryId) {
           const recommendedResponse = await fetch(`/api/products?per_page=20&category=${product.categoryId}`)
           if (recommendedResponse.ok) {
-            const products = await recommendedResponse.json()
+            const data = await recommendedResponse.json()
+            const products = data.products || data
             const recommended = products
               .filter((p: Product) => p.id !== product.id)
               .slice(0, 4)

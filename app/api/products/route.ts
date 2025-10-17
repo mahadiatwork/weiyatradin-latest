@@ -32,20 +32,26 @@ export async function GET(request: NextRequest) {
     }
 
     const page = parseInt(searchParams.get('page') || '1')
-    const per_page = parseInt(searchParams.get('per_page') || '12')
+    const per_page = parseInt(searchParams.get('per_page') || '20')
     const category = searchParams.get('category') || undefined
     const search = searchParams.get('search') || undefined
 
-    const wcProducts = await listProducts({
+    const wcResponse = await listProducts({
       page,
       per_page,
       category,
       search,
     })
 
-    const products = transformWCProducts(wcProducts)
+    const products = transformWCProducts(wcResponse.data)
 
-    return NextResponse.json(products)
+    return NextResponse.json({
+      products,
+      total: wcResponse.total,
+      totalPages: wcResponse.totalPages,
+      currentPage: page,
+      perPage: per_page,
+    })
   } catch (error) {
     console.error('Products API Error:', error)
     return NextResponse.json(

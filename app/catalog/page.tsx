@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { Filter, Grid, List, SortAsc } from "lucide-react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { Filter, Grid, List, SortAsc, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -15,13 +15,28 @@ import type { Product } from "@/lib/types"
 
 type SortOption = "relevance" | "price-low" | "price-high" | "moq-low" | "moq-high" | "rating"
 
+interface ProductsResponse {
+  products: Product[]
+  total: number
+  totalPages: number
+  currentPage: number
+  perPage: number
+}
+
 export default function CatalogPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const categoryParam = searchParams.get("category")
+  const pageParam = searchParams.get("page")
 
   const [products, setProducts] = useState<Product[]>([])
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [currentPage, setCurrentPage] = useState(parseInt(pageParam || '1', 10))
+  const [categorySlug, setCategorySlug] = useState<string | null>(categoryParam)
+  const [categoryId, setCategoryId] = useState<number | null>(null)
   const [filters, setFilters] = useState<FilterState>({
-    categories: categoryParam ? [categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)] : [],
+    categories: [],
     priceRange: [0, 200],
     moqRange: [1, 1000],
   })
@@ -29,18 +44,53 @@ export default function CatalogPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(true)
 
+  // Fetch category ID from slug
+  useEffect(() => {
+    const fetchCategoryId = async () => {
+      if (!categorySlug) {
+        setCategoryId(null)
+        return
+      }
+
+      try {
+        const response = await fetch('/api/categories')
+        if (response.ok) {
+          const categories = await response.json()
+          const category = categories.find((cat: any) => cat.slug === categorySlug)
+          if (category) {
+            setCategoryId(category.id)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching category:', error)
+      }
+    }
+
+    fetchCategoryId()
+  }, [categorySlug])
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch('/api/products?per_page=50')
+        const params = new URLSearchParams()
+        params.set('page', currentPage.toString())
+        params.set('per_page', '20')
+        
+        if (categoryId) {
+          params.set('category', categoryId.toString())
+        }
+        
+        const response = await fetch(`/api/products?${params.toString()}`)
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
           console.error('Products API failed:', response.status, errorData)
           throw new Error(`Failed to fetch products: ${response.status}`)
         }
-        const data = await response.json()
-        setProducts(data)
+        const data: ProductsResponse = await response.json()
+        setProducts(data.products)
+        setTotal(data.total)
+        setTotalPages(data.totalPages)
       } catch (error) {
         console.error('Error fetching products:', error)
       } finally {
@@ -49,25 +99,19 @@ export default function CatalogPage() {
     }
 
     fetchProducts()
-  }, [])
+  }, [currentPage, categoryId])
 
   const filteredAndSortedProducts = useMemo(() => {
-    const filtered = products.filter((product) => {
-      // Category filter
-      if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
-        return false
-      }
+    let filtered = [...products]
 
-      // Price filter (using single price for simplicity)
+    // Client-side price filter
+    filtered = filtered.filter((product) => {
       if (product.singlePrice < filters.priceRange[0] || product.singlePrice > filters.priceRange[1]) {
         return false
       }
-
-      // MOQ filter
       if (product.moq < filters.moqRange[0] || product.moq > filters.moqRange[1]) {
         return false
       }
-
       return true
     })
 
@@ -89,7 +133,6 @@ export default function CatalogPage() {
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0))
         break
       default:
-        // Keep original order for relevance
         break
     }
 
@@ -106,6 +149,14 @@ export default function CatalogPage() {
       priceRange: [0, 200],
       moqRange: [1, 1000],
     })
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', page.toString())
+    router.push(`?${params.toString()}`)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -131,7 +182,10 @@ export default function CatalogPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
                 <h1 className="text-2xl font-bold">Product Catalog</h1>
-                <p className="text-muted-foreground">{filteredAndSortedProducts.length} products found</p>
+                <p className="text-muted-foreground">
+                  {total.toLocaleString()} product{total !== 1 ? 's' : ''} found
+                  {categorySlug && ` in ${categorySlug.replace(/-/g, ' ')}`}
+                </p>
               </div>
 
               <div className="flex items-center gap-4">
@@ -216,6 +270,59 @@ export default function CatalogPage() {
                 <h3 className="text-lg font-semibold mb-2">No products found</h3>
                 <p className="text-muted-foreground mb-4">Try adjusting your filters or search criteria.</p>
                 <Button onClick={handleClearFilters}>Clear Filters</Button>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      // Show first page, last page, current page, and pages around current
+                      return page === 1 || 
+                             page === totalPages || 
+                             Math.abs(page - currentPage) <= 1
+                    })
+                    .map((page, idx, arr) => {
+                      // Add ellipsis if there's a gap
+                      const showEllipsisBefore = idx > 0 && page - arr[idx - 1] > 1
+                      
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsisBefore && <span className="px-2 text-muted-foreground">...</span>}
+                          <Button
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(page)}
+                            className="min-w-[2.5rem]"
+                          >
+                            {page}
+                          </Button>
+                        </div>
+                      )
+                    })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
               </div>
             )}
           </div>

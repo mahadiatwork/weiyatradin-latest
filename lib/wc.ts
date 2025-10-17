@@ -70,6 +70,12 @@ function buildAuthHeader(): string {
   return `Basic ${Buffer.from(credentials).toString('base64')}`
 }
 
+export interface WCResponse<T> {
+  data: T
+  total: number
+  totalPages: number
+}
+
 export async function wcFetch(
   path: string,
   init?: RequestInit,
@@ -120,15 +126,69 @@ export async function wcFetch(
   return response.json()
 }
 
+export async function wcFetchWithMeta(
+  path: string,
+  init?: RequestInit,
+  search?: Record<string, string | number | boolean>
+): Promise<{ data: any; total: number; totalPages: number }> {
+  if (!WC_BASE_URL) {
+    throw new Error('WC_BASE_URL environment variable is not configured.')
+  }
+  
+  if (!WC_CONSUMER_KEY || !WC_CONSUMER_SECRET) {
+    throw new Error('WooCommerce API credentials are not configured.')
+  }
+
+  if (!WC_BASE_URL.startsWith('http://') && !WC_BASE_URL.startsWith('https://')) {
+    throw new Error(`WC_BASE_URL must start with http:// or https://`)
+  }
+  
+  let url: URL
+  try {
+    url = new URL(`${WC_BASE_URL}/wp-json/wc/v3${path}`)
+  } catch (error) {
+    throw new Error(`Invalid WC_BASE_URL format: ${WC_BASE_URL}`)
+  }
+  
+  if (search) {
+    Object.entries(search).forEach(([key, value]) => {
+      url.searchParams.append(key, String(value))
+    })
+  }
+
+  const headers: HeadersInit = {
+    'Authorization': buildAuthHeader(),
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    ...init?.headers,
+  }
+
+  const response = await fetch(url.toString(), {
+    ...init,
+    headers,
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`WooCommerce API Error (${response.status}): ${errorText}`)
+  }
+
+  const data = await response.json()
+  const total = parseInt(response.headers.get('X-WP-Total') || '0', 10)
+  const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '0', 10)
+
+  return { data, total, totalPages }
+}
+
 export async function listProducts(params?: {
   page?: number
   per_page?: number
   category?: number | string
   search?: string
-}): Promise<WCProduct[]> {
+}): Promise<WCResponse<WCProduct[]>> {
   const searchParams: Record<string, string | number> = {
     page: params?.page || 1,
-    per_page: params?.per_page || 12,
+    per_page: params?.per_page || 20,
     _fields: 'id,name,slug,permalink,price,regular_price,sale_price,images,short_description,categories,stock_status,stock_quantity,meta_data',
   }
 
@@ -140,7 +200,12 @@ export async function listProducts(params?: {
     searchParams.search = params.search
   }
 
-  return wcFetch('/products', {}, searchParams)
+  const result = await wcFetchWithMeta('/products', {}, searchParams)
+  return {
+    data: result.data,
+    total: result.total,
+    totalPages: result.totalPages,
+  }
 }
 
 export async function getProduct(id: number | string): Promise<WCProduct> {

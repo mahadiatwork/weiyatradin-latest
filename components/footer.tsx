@@ -44,18 +44,18 @@ export function Footer() {
             <h3 className="font-semibold">Products</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/catalog?category=electronics" className="hover:text-primary">
-                  Electronics
+                <Link href="/catalog?category=gadgets" className="hover:text-primary">
+                  Gadgets
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?category=accessories" className="hover:text-primary">
-                  Accessories
+                <Link href="/catalog?category=hats-caps" className="hover:text-primary">
+                  Hats and Caps
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?category=home" className="hover:text-primary">
-                  Home & Living
+                <Link href="/catalog?category=medical-devices" className="hover:text-primary">
+                  Medical Devices
                 </Link>
               </li>
               <li>
