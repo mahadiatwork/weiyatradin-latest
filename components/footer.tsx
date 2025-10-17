@@ -10,9 +10,9 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <div className="relative h-36 w-[672px]">
+              <div className="relative h-20 w-40">
                 <Image
-                  src="/logo-full.png"
+                  src="/weiya-logo.png"
                   alt="WeiyaTrading - Your China Sourcing Partner"
                   fill
                   className="object-contain object-left"
@@ -34,7 +34,7 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>No.11, Building 11, Wenzhou Trade City, Fengshou Road, Wangchu Sub-district, Jiaozuo City, Henan Province, China</span>
+                <span>No. 1096 Yuxi Road, Jiaozuo Science and Technology Headquarters New City (East District), Building 1, Room 201, Jiaozuo Demonstration Zone, Henan Province</span>
               </div>
             </div>
           </div>

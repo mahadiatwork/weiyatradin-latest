@@ -26,7 +26,7 @@ export function Header() {
           <Link href="/" className="flex items-center flex-shrink-0">
             <div className="relative h-12 w-44 sm:h-14 sm:w-52">
               <Image
-                src="/logo-full.png"
+                src="/weiya-logo.png"
                 alt="WeiyaTrading - Your China Sourcing Partner"
                 fill
                 className="object-contain object-left"
