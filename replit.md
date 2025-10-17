@@ -13,11 +13,20 @@ Preferred communication style: Simple, everyday language.
 **Company Contact Details**:
 - Phone: +86 15138088555
 - Email: lizhenhua991121@gmail.com
-- Address: No.11, Building 11, Wenzhou Trade City, Fengshou Road, Wangchu Sub-district, Jiaozuo City, Henan Province, China
+- Address: No. 1096 Yuxi Road, Jiaozuo Science and Technology Headquarters New City (East District), Building 1, Room 201, Jiaozuo Demonstration Zone, Henan Province
 - Favicon: Globe icon with China highlighted (located at `/public/favicon.ico`)
 
-**Navigation & Header** (Updated September 2025):
-- Logo sized at h-10 w-40 (sm: h-12 w-48) for optimal visibility without cramping
+**Logo & Branding** (Updated October 2025):
+- Company logo: `/public/weiya-logo.png` - Features traditional Chinese building element with circular design
+- Logo displays "Weiya" with "Henan Weiya Trading Co Ltd." tagline
+- Header logo sized at h-12 w-44 (sm: h-14 w-52) for optimal visibility
+- Footer logo sized at h-20 w-40
+- Brand color scheme: Blue theme matching logo
+  - Primary: oklch(0.55 0.13 235) - Medium blue
+  - Accent: oklch(0.70 0.12 230) - Light blue
+  - Dark mode primary: oklch(0.70 0.12 230) - Light blue
+
+**Navigation & Header**:
 - Navigation layout uses flex-1 with justify-start and ml-8 for better spacing
 - Navigation visible on md+ breakpoints (tablets and desktop)
 - Mobile menu not yet implemented (navigation hidden on screens <768px)
