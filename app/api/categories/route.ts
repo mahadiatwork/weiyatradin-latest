@@ -45,9 +45,15 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    // Filter out categories with no products or without images (except if they have products)
+    // Filter categories:
+    // - Show categories with products AND images
+    // - Show categories with 5+ products even without images
+    // - Hide "Uncategorized" category
     const filteredCategories = enrichedCategories.filter(
-      (cat) => cat.count > 0 && (cat.image || cat.count > 0)
+      (cat) => 
+        cat.count > 0 && 
+        cat.slug !== 'uncategorized' &&
+        (cat.image !== null || cat.count >= 5)
     )
 
     return NextResponse.json(filteredCategories)

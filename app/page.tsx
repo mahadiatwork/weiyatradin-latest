@@ -38,7 +38,7 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         const [categoriesRes, productsRes] = await Promise.all([
-          fetch('/api/categories'),
+          fetch('/api/categories?enrich=true'),
           fetch('/api/products?per_page=4')
         ])
 
