@@ -228,7 +228,6 @@ export async function listCategories(params?: {
     page: params?.page || 1,
     per_page: params?.per_page || 50,
     hide_empty: params?.hide_empty !== undefined ? (params.hide_empty ? 1 : 0) : 0,
-    _fields: 'id,name,slug,parent,description,image,count',
   }
 
   if (params?.parent !== undefined) {
