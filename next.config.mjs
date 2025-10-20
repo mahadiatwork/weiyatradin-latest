@@ -12,9 +12,13 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cms.weiyatrading.com',
-        pathname: '/wp-content/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'cms.weiyatrading.com',
       },
     ],
+    domains: ['cms.weiyatrading.com'],
   },
 }
 

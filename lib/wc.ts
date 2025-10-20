@@ -189,6 +189,7 @@ export async function listProducts(params?: {
   const searchParams: Record<string, string | number> = {
     page: params?.page || 1,
     per_page: params?.per_page || 20,
+    status: 'publish',
     _fields: 'id,name,slug,permalink,price,regular_price,sale_price,images,short_description,categories,stock_status,stock_quantity,meta_data',
   }
 

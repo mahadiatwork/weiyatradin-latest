@@ -6,18 +6,35 @@ The platform is designed for business buyers looking to source products at scale
 
 # Recent Changes
 
+**Published Products Only Filter** (October 2025):
+- **Critical Fix**: Products API now filters for `status: 'publish'` only
+- Excludes draft, pending, and private products from listings
+- Fixed discrepancy: Was showing 74 products (including drafts) now correctly shows 73 published products matching CMS
+- Ensures accurate product counts across all pages (homepage, catalog, categories)
+
+**Zero Caching Configuration** (October 2025):
+- All API routes return strict no-cache headers: `Cache-Control: no-store, no-cache, must-revalidate`
+- All fetch calls use `cache: 'no-store'` to prevent client-side caching
+- All routes use `dynamic = 'force-dynamic'` for server-side dynamic rendering
+- Changes in CMS now appear immediately on website (no stale data)
+
+**Category Images for Production** (October 2025):
+- Updated Next.js image configuration with `domains` and expanded `remotePatterns`
+- Supports both HTTP and HTTPS protocols for cms.weiyatrading.com
+- Images use `unoptimized: true` flag for better production compatibility
+- Categories without images display Package icon fallback
+
 **Category Enrichment & Accurate Counts** (October 2025):
-- Categories API now supports `?enrich=true` parameter for accurate product counts
+- Categories API supports `?enrich=true` parameter for accurate product counts
 - Enrichment fetches actual product counts from WooCommerce products API for each category
 - Filters out: categories with 0 products, "Uncategorized", and categories without images (unless 5+ products)
 - Homepage displays all relevant categories with correct counts (e.g., "Kitchen accessories: 23 products")
-- WooCommerce's native count field was inaccurate and has been replaced with real-time counts
 
 **Pagination & API Response Format** (October 2025):
-- Products API now returns paginated response: `{ products: [], total, totalPages, currentPage, perPage }`
+- Products API returns paginated response: `{ products: [], total, totalPages, currentPage, perPage }`
 - Catalog page displays 20 products per page with Previous/Next navigation
-- Product count shows accurate totals from WooCommerce (e.g., "74 products found", "Showing 1-20 of 74")
-- Homepage and product detail page updated to handle new API response format with backward compatibility
+- Product count shows accurate totals from WooCommerce
+- Homepage and product detail page handle new API response format with backward compatibility
 - Category filtering uses slug-to-ID mapping for proper WooCommerce integration
 
 # User Preferences
