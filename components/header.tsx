@@ -21,10 +21,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-28 sm:h-32 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0">
-            <div className="relative h-12 w-44 sm:h-14 sm:w-52">
+            <div className="relative h-24 w-88 sm:h-28 sm:w-104">
               <Image
                 src="/weiya-logo.png"
                 alt="WeiyaTrading - Your China Sourcing Partner"
