@@ -11,10 +11,16 @@ export async function GET(request: NextRequest) {
     const id = searchParams.get('id')
     const slug = searchParams.get('slug')
     
+    const cacheHeaders = {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    }
+
     if (id) {
       const wcProduct = await getProduct(id)
       const product = transformWCProduct(wcProduct)
-      return NextResponse.json(product)
+      return NextResponse.json(product, { headers: cacheHeaders })
     }
 
     if (slug) {
@@ -28,7 +34,7 @@ export async function GET(request: NextRequest) {
       }
       
       const product = transformWCProduct(wcProduct)
-      return NextResponse.json(product)
+      return NextResponse.json(product, { headers: cacheHeaders })
     }
 
     const page = parseInt(searchParams.get('page') || '1')
@@ -51,6 +57,12 @@ export async function GET(request: NextRequest) {
       totalPages: wcResponse.totalPages,
       currentPage: page,
       perPage: per_page,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     })
   } catch (error) {
     console.error('Products API Error:', error)

@@ -38,8 +38,8 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         const [categoriesRes, productsRes] = await Promise.all([
-          fetch('/api/categories?enrich=true'),
-          fetch('/api/products?per_page=4')
+          fetch('/api/categories?enrich=true', { cache: 'no-store' }),
+          fetch('/api/products?per_page=4', { cache: 'no-store' })
         ])
 
         if (categoriesRes.ok) {

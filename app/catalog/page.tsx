@@ -53,7 +53,7 @@ export default function CatalogPage() {
       }
 
       try {
-        const response = await fetch('/api/categories')
+        const response = await fetch('/api/categories', { cache: 'no-store' })
         if (response.ok) {
           const categories = await response.json()
           const category = categories.find((cat: any) => cat.slug === categorySlug)
@@ -81,7 +81,7 @@ export default function CatalogPage() {
           params.set('category', categoryId.toString())
         }
         
-        const response = await fetch(`/api/products?${params.toString()}`)
+        const response = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' })
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
           console.error('Products API failed:', response.status, errorData)

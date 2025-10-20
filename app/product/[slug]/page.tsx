@@ -43,7 +43,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       try {
         setIsLoading(true)
         
-        const productResponse = await fetch(`/api/products?slug=${params.slug}`)
+        const productResponse = await fetch(`/api/products?slug=${params.slug}`, { cache: 'no-store' })
         
         if (!productResponse.ok) {
           if (productResponse.status === 404) {
@@ -61,7 +61,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         setProduct(product)
         
         if (product.categoryId) {
-          const recommendedResponse = await fetch(`/api/products?per_page=20&category=${product.categoryId}`)
+          const recommendedResponse = await fetch(`/api/products?per_page=20&category=${product.categoryId}`, { cache: 'no-store' })
           if (recommendedResponse.ok) {
             const data = await recommendedResponse.json()
             const products = data.products || data

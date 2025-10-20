@@ -19,8 +19,14 @@ export async function GET(request: NextRequest) {
       hide_empty: false,
     })
 
+    const cacheHeaders = {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    }
+
     if (!enrich) {
-      return NextResponse.json(categories)
+      return NextResponse.json(categories, { headers: cacheHeaders })
     }
 
     // Enrich categories with accurate product counts
@@ -56,7 +62,7 @@ export async function GET(request: NextRequest) {
         (cat.image !== null || cat.count >= 5)
     )
 
-    return NextResponse.json(filteredCategories)
+    return NextResponse.json(filteredCategories, { headers: cacheHeaders })
   } catch (error) {
     console.error('Categories API Error:', error)
     return NextResponse.json(
